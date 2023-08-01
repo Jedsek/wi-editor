@@ -7,6 +7,7 @@ pub enum Mode {
     Command,
     Input,
     Search,
+    Help,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -34,6 +35,7 @@ impl Display for Mode {
             Command => "Command",
             Input => "Input",
             Search => "Search",
+            Help => "Help",
         };
         write!(f, "{}", mode)
     }
@@ -63,6 +65,10 @@ impl Mode {
         self == &Mode::Search
     }
 
+    pub fn is_help(&self) -> bool {
+        self == &Mode::Help
+    }
+
     pub fn is_dashboard(&self, state: DashState) -> bool {
         self == &Mode::Dashboard(state)
     }
@@ -85,5 +91,9 @@ impl Mode {
 
     pub fn to_search(&mut self) {
         *self = Mode::Search
+    }
+
+    pub fn to_help(&mut self) {
+        *self = Mode::Help
     }
 }

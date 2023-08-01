@@ -12,7 +12,7 @@ use tui::{
 use tui_textarea::TextArea;
 
 /// helper function to create a centered rect using up certain percentage of the available rect `r`
-pub fn centered_line(percent_y: u16, r: Rect) -> Rect {
+pub fn centered_line(percent_y: u16, chunk: Rect) -> Rect {
     Layout::default()
         .direction(Direction::Vertical)
         .constraints(
@@ -23,10 +23,10 @@ pub fn centered_line(percent_y: u16, r: Rect) -> Rect {
             ]
             .as_ref(),
         )
-        .split(r)[1]
+        .split(chunk)[1]
 }
 
-pub fn centered_area(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+pub fn centered_area(percent_x: u16, percent_y: u16, chunk: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
@@ -37,7 +37,7 @@ pub fn centered_area(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
             ]
             .as_ref(),
         )
-        .split(r);
+        .split(chunk);
 
     Layout::default()
         .direction(Direction::Horizontal)

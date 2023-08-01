@@ -1,5 +1,5 @@
 use crate::{mode::Mode, utils::new_textarea};
-use std::{error, path::Path};
+use std::{error, path::Path, fs};
 use tui_textarea::{CursorMove, TextArea};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -34,21 +34,6 @@ impl<'a> App<'a> {
     /// Handles the tick event of the terminal.
     pub fn tick(&self) {}
 
-    /// Set running to false to quit the application.
-    pub fn quit(&mut self) {
-        self.running = false;
-    }
-
-    // #[rustfmt::skip]
-    pub fn write(&mut self) {
-        let path = self.path;
-        let content = self.textarea.clone().into_lines().into_iter().map(|mut a| {
-            a.push('\n');
-            a
-        })
-        .collect::<String>();
-        std::fs::write(path, content).ok();
-    }
 
     pub fn reset_all(&mut self) {
         if !self.counter.is_empty() {
@@ -58,12 +43,20 @@ impl<'a> App<'a> {
         if !self.echo_text.is_empty() {
             self.echo_text.clear();
         }
+
+        if !self.command.is_empty() {
+            self.command.clear();
+        }
     }
     
+    #[rustfmt::skip]
+    pub fn counter(&self) -> usize {
+        self.counter.trim_start_matches(|ch| ch == '0').parse::<usize>().unwrap_or(1)
+    }
 
     #[rustfmt::skip]
     pub fn exec_movement(&mut self, ch: char) {
-        let cnt = self.counter.trim_start_matches(|ch| ch == '0').parse::<usize>().unwrap_or(1);
+        let cnt = self.counter();
         for _ in 1..=cnt {
             match ch {
                 'h' => self.textarea.move_cursor(CursorMove::Back),
@@ -83,14 +76,52 @@ impl<'a> App<'a> {
         self.echo_text.clear();
     }
 
+}
+
+// Commands
+impl App<'_> {
+    pub fn quit(&mut self) {
+        self.running = false;
+    }
+
+    pub fn write(&mut self) {
+        let path = self.path;
+        let content = self.textarea.clone().into_lines().into_iter().map(|mut a| {
+            a.push('\n');
+            a
+        })
+        .collect::<String>();
+        match fs::write(path, content) {
+            Ok(_) => self.echo_text = "Successfully write".into(),
+            Err(err) => {
+                let err = err.to_string();
+                self.echo_text = String::from("Failed: ") + &err;
+            }
+        }
+    }
+
+    pub fn unknown_command(&mut self) {
+        self.reset_all();
+        self.echo_text = "Unknown command".into();
+    }
+    
     pub fn execute_command(&mut self) {
         match self.command.as_str() {
             "q" | "quit" => self.quit(),
             "w" | "write" => self.write(),
-            _ => (),
+            "h" | "help" => {
+                self.mode.to_help();
+                self.reset_all();
+                return;
+            }
+            _ => self.unknown_command(),
         }
-    }
+        self.mode.to_normal();
+        self.command.clear();
+    }    
+}
 
+impl App<'_> {
     pub fn jump_to_input(&mut self, ch: char) {
         let mode = &mut self.mode;
         let textarea =  &mut self.textarea;

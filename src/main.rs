@@ -13,7 +13,7 @@ fn main() -> AppResult<()> {
     let path = match path {
         Some(p) if p.exists() => p,
         _ => {
-            eprintln!("Faild: There are no argument or the path doesn't exist");
+            eprintln!("Failed: There are no argument or the path doesn't exist");
             return Ok(());
         }
     };

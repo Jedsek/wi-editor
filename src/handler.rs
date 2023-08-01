@@ -19,11 +19,19 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         Mode::Input => handle_input_events(key_event, app),
         Mode::Command => handle_command_events(key_event, app),
         Mode::Search => handle_search_events(key_event, app),
+        Mode::Help => handle_help_events(key_event, app),
     }
 }
 
 fn handle_dashboard_events(key_event: KeyEvent, app: &mut App<'_>) -> AppResult<()> {
     todo!()
+}
+
+fn handle_help_events(key_event: KeyEvent, app: &mut App<'_>) -> AppResult<()> {
+    if let KeyCode::Esc = key_event.code {
+        app.mode.to_normal();
+    }
+    Ok(())
 }
 
 fn handle_command_events(key_event: KeyEvent, app: &mut App<'_>) -> AppResult<()> {
@@ -44,12 +52,7 @@ fn handle_command_events(key_event: KeyEvent, app: &mut App<'_>) -> AppResult<()
             app.command.pop();
             app.echo_text.pop();
         }
-        KeyCode::Enter => {
-            app.execute_command();
-            app.command.clear();
-            app.echo_text.clear();
-            app.mode.to_normal();
-        }
+        KeyCode::Enter => app.execute_command(),
 
         _ => {}
     }
@@ -73,12 +76,15 @@ pub fn handle_normal_events(key_event: KeyEvent, app: &mut App) -> AppResult<()>
     let code = key_event.code;
     match code {
         KeyCode::Esc => app.reset_all(),
-        KeyCode::Char(':') => app.mode.to_command(),
+        KeyCode::Char(':') => {
+            app.mode.to_command();
+            app.echo_text.clear();
+        }
         KeyCode::Char('/') => app.mode.to_search(),
 
         KeyCode::Char(num @ '0'..='9') => {
-            app.counter.push(num);
-            if !app.counter.starts_with('0') {
+            if !(app.counter.is_empty() && num == '0') {
+                app.counter.push(num);
                 app.echo_text.push(num);
             }
         }
@@ -90,10 +96,12 @@ pub fn handle_normal_events(key_event: KeyEvent, app: &mut App) -> AppResult<()>
         }
 
         KeyCode::Left | KeyCode::Right | KeyCode::Up | KeyCode::Down => {
-            app.textarea.input(key_event);
+            for _ in 1..=app.counter() {
+                app.textarea.input(key_event);
+            }
         }
 
-        _ => {}
+        _ => app.reset_all(),
     }
     Ok(())
 }
