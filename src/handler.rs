@@ -23,7 +23,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     }
 }
 
-fn handle_dashboard_events(key_event: KeyEvent, app: &mut App<'_>) -> AppResult<()> {
+fn handle_dashboard_events(key_event: KeyEvent, _app: &mut App<'_>) -> AppResult<()> {
     todo!()
 }
 

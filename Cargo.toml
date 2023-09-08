@@ -17,5 +17,5 @@ opt-level = 2
 [dependencies]
 crossterm = "0.26.1"
 textwrap = "0.16.0"
-tui = { package = "ratatui", version = "0.22.0" }
-tui-textarea = { path = "../tui-textarea", version = "*", default-features = false, features = ["ratatui-crossterm", "search"]}
+tui = { package = "ratatui", version = "0.23.0" }
+tui-textarea = { path = "./packages/tui-textarea", version = "0.2.0", default-features = false, features = ["ratatui-crossterm", "search"]}

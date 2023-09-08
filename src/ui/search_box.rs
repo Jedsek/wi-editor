@@ -35,7 +35,7 @@ pub fn render<B: Backend>(app: &mut App, chunk: Rect, frame: &mut Frame<'_, B>) 
         app.search_line.set_block(block);
         app.search_line.set_style(style);
 
-        frame.render_widget(Clear, chunk);
+        frame.render_widget(Clear, chunks[0]);
         frame.render_widget(app.search_line.widget(), chunks[0]);
 
         if let Some(search_err) = search_err {
